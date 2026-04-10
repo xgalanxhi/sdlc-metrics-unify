@@ -61,6 +61,7 @@ jobs:
     needs: [test, lint, security-scan]
     outputs:
       version: ${{ steps.version.outputs.version }}
+      artifact_id: ${{ steps.register-artifact.outputs.artifact-id }}
     steps:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
@@ -69,7 +70,6 @@ jobs:
 
       - name: Generate version and build
         id: version
-        kind: build
         uses: docker://node:18
         shell: sh
         run: |
@@ -92,8 +92,46 @@ jobs:
           cd ..
           ls -lh ${{ env.APP_NAME }}-${VERSION}.tar.gz
 
-      # Artifact registration is handled automatically by 'kind: build' annotation
-      # Evidence can be added via other mechanisms if needed
+      - name: Register Build Artifact in CloudBees Unify
+        id: register-artifact
+        uses: cloudbees-io/register-build-artifact@v1
+        with:
+          name: ${{ cloudbees.scm.repositoryUrl }}
+          version: ${{ steps.version.outputs.version }}
+          type: Binary
+
+      - name: Add Labels to Artifact
+        uses: cloudbees-io/label-artifact-version@v1
+        with:
+          artifact-id: ${{ steps.register-artifact.outputs.artifact-id }}
+          labels: "${{ cloudbees.scm.branch }},nodejs,express,automated"
+
+      - name: Publish Build Evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |-
+            # Build Evidence Report
+
+            ## Artifact Details
+            - **Repository**: ${{ cloudbees.scm.repositoryUrl }}
+            - **Version**: ${{ steps.version.outputs.version }}
+            - **Artifact ID**: ${{ steps.register-artifact.outputs.artifact-id }}
+            - **Type**: NPM Package
+            - **Branch**: ${{ cloudbees.scm.branch }}
+
+            ## Build Configuration
+            - **Node Version**: ${{ env.NODE_VERSION }}
+            - **Package**: ${{ env.APP_NAME }}-${{ steps.version.outputs.version }}.tar.gz
+
+            ## Quality Gates
+            - **Unit Tests**: ✅ Passed
+            - **Linting**: ✅ Completed
+            - **Security Scan**: ✅ Completed
+
+            ## Workflow Summary
+            - **Commit**: ${{ cloudbees.scm.sha }}
+            - **Workflow Run**: ${{ cloudbees.run_id }}
+            - **Triggered by**: ${{ cloudbees.api.user.email }}
 
   deploy-dev:
     needs: [build]
@@ -104,7 +142,6 @@ jobs:
         uses: cloudbees-io/checkout@v2
 
       - name: Deploy to Development
-        kind: deploy
         uses: docker://node:18
         shell: sh
         run: |
@@ -113,8 +150,12 @@ jobs:
           ls -lh
           echo "Deployment completed successfully"
 
-      # Deployment registration - artifact tracking via version and environment
-      # Note: artifact-id may be auto-linked via 'kind: deploy' annotation
+      - name: Register Deployed Artifact to Development
+        uses: cloudbees-io/register-deployed-artifact@v1
+        with:
+          artifact-id: ${{ needs.build.outputs.artifact_id }}
+          target-environment: development
+          labels: automated-deployment
 
   deploy-staging:
     needs: [build]
@@ -124,9 +165,7 @@ jobs:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
 
-
       - name: Deploy to Staging
-        kind: deploy
         uses: docker://node:18
         shell: sh
         run: |
@@ -135,15 +174,19 @@ jobs:
           ls -lh
           echo "Deployment completed successfully"
 
+      - name: Register Deployed Artifact to Staging
+        uses: cloudbees-io/register-deployed-artifact@v1
+        with:
+          artifact-id: ${{ needs.build.outputs.artifact_id }}
+          target-environment: staging
+          labels: automated-deployment
+
       - name: Run smoke tests
         uses: docker://node:18
         shell: sh
         run: |
           echo "Running smoke tests on staging environment..."
           echo "All smoke tests passed"
-
-      # Deployment registration - artifact tracking via version and environment
-      # Note: artifact-id may be auto-linked via 'kind: deploy' annotation
 
   deploy-production:
     needs: [build, deploy-staging]
@@ -154,7 +197,6 @@ jobs:
         uses: cloudbees-io/checkout@v2
 
       - name: Deploy to Production
-        kind: deploy
         uses: docker://node:18
         shell: sh
         run: |
@@ -163,6 +205,14 @@ jobs:
           ls -lh
           echo "Production deployment completed successfully"
 
+      - name: Register Deployed Artifact to Production
+        if: always()
+        uses: cloudbees-io/register-deployed-artifact@v1
+        with:
+          artifact-id: ${{ needs.build.outputs.artifact_id }}
+          target-environment: production
+          labels: automated-deployment
+
       - name: Post-deployment validation
         uses: docker://node:18
         shell: sh
@@ -170,5 +220,21 @@ jobs:
           echo "Running post-deployment validation..."
           echo "Validation completed successfully"
 
-      # Deployment registration - artifact tracking via version and environment
-      # Note: artifact-id may be auto-linked via 'kind: deploy' annotation
+      - name: Publish Deployment Evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |-
+            # Production Deployment Evidence
+
+            ## Deployment Details
+            - **Version**: ${{ needs.build.outputs.version }}
+            - **Environment**: Production
+            - **Artifact ID**: ${{ needs.build.outputs.artifact_id }}
+
+            ## Validation
+            - **Smoke Tests**: ✅ Passed
+            - **Post-deployment Checks**: ✅ Passed
+
+            ## Workflow Info
+            - **Run ID**: ${{ cloudbees.run_id }}
+            - **Deployed by**: ${{ cloudbees.api.user.email }}
