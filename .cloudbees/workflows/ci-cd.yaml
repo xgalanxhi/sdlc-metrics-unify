@@ -203,13 +203,14 @@ jobs:
           else
             echo "Production deployment completed successfully"
           fi
-      #- name: Register Deployed Artifact to Production
-        #if: always()
-        #uses: cloudbees-io/register-deployed-artifact@v2
-        #with:
-          #artifact-id: ${{ needs.build.outputs.artifact_id }}
-          #target-environment: production
-          #labels: automated-deployment
+      - name: Register Deployed Artifact to Production
+        if: always()
+        uses: cloudbees-io/register-deployed-artifact@v2
+        with:
+          artifact-id: ${{ needs.build.outputs.artifact_id }}
+          target-environment: production
+          labels: automated-deployment
+          status: ${{ job.status }}
       - name: Post-deployment validation
         uses: docker://node:18
         shell: sh
