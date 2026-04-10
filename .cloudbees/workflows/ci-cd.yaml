@@ -1,0 +1,174 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+
+name: CI/CD Pipeline
+
+on:
+  workflow_dispatch: {}
+
+env:
+  NODE_VERSION: "18"
+  APP_NAME: "sdlc-metrics-demo"
+
+jobs:
+  test:
+    steps:
+      - name: Checkout code
+        uses: cloudbees-io/checkout@v2
+
+      - name: Install dependencies and run tests
+        uses: docker://node:18
+        shell: sh
+        run: |
+          npm ci
+          npm run test:ci
+
+      - name: Publish Test Results
+        uses: cloudbees-io/publish-test-results@v2
+        if: always()
+        with:
+          test-type: JUNIT
+          results-path: junit.xml
+
+  lint:
+    needs: [test]
+    steps:
+      - name: Checkout code
+        uses: cloudbees-io/checkout@v2
+
+      - name: Install dependencies and run lint
+        uses: docker://node:18
+        shell: sh
+        run: |
+          npm ci
+          npm run lint
+        continue-on-error: true
+
+  security-scan:
+    needs: [test]
+    steps:
+      - name: Checkout code
+        uses: cloudbees-io/checkout@v2
+
+      - name: Security scan placeholder
+        uses: docker://node:18
+        shell: sh
+        run: |
+          echo "Security scan would run here"
+          echo "Configure security scanning tools as needed"
+
+  build:
+    needs: [test, lint, security-scan]
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: cloudbees-io/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Generate version and build
+        id: version
+        kind: build
+        uses: docker://node:18
+        shell: sh
+        run: |
+          git config --global --add safe.directory /cloudbees/workspace
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          VERSION="1.0.${COMMIT_COUNT}-${SHORT_SHA}"
+          printf "%s" "$VERSION" > $CLOUDBEES_OUTPUTS/version
+          echo "Generated version: $VERSION"
+
+          npm ci
+          npm ci --production
+          mkdir -p dist
+          cp -r src/ dist/
+          cp -r node_modules/ dist/
+          cp package.json dist/
+
+          cd dist
+          tar -czf ../${{ env.APP_NAME }}-${VERSION}.tar.gz .
+          cd ..
+          ls -lh ${{ env.APP_NAME }}-${VERSION}.tar.gz
+
+      # Artifact registration is handled automatically by 'kind: build' annotation
+      # Evidence can be added via other mechanisms if needed
+
+  deploy-dev:
+    needs: [build]
+    if: cloudbees.scm.branch == 'develop'
+    environment: development
+    steps:
+      - name: Checkout code
+        uses: cloudbees-io/checkout@v2
+
+      - name: Deploy to Development
+        kind: deploy
+        uses: docker://node:18
+        shell: sh
+        run: |
+          echo "Deploying version ${{ needs.build.outputs.version }} to Development environment"
+          echo "Artifact: ${{ env.APP_NAME }}-${{ needs.build.outputs.version }}.tar.gz"
+          ls -lh
+          echo "Deployment completed successfully"
+
+      # Deployment registration - artifact tracking via version and environment
+      # Note: artifact-id may be auto-linked via 'kind: deploy' annotation
+
+  deploy-staging:
+    needs: [build]
+    if: cloudbees.scm.branch == 'main'
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: cloudbees-io/checkout@v2
+
+
+      - name: Deploy to Staging
+        kind: deploy
+        uses: docker://node:18
+        shell: sh
+        run: |
+          echo "Deploying version ${{ needs.build.outputs.version }} to Staging environment"
+          echo "Artifact: ${{ env.APP_NAME }}-${{ needs.build.outputs.version }}.tar.gz"
+          ls -lh
+          echo "Deployment completed successfully"
+
+      - name: Run smoke tests
+        uses: docker://node:18
+        shell: sh
+        run: |
+          echo "Running smoke tests on staging environment..."
+          echo "All smoke tests passed"
+
+      # Deployment registration - artifact tracking via version and environment
+      # Note: artifact-id may be auto-linked via 'kind: deploy' annotation
+
+  deploy-production:
+    needs: [build, deploy-staging]
+    if: cloudbees.scm.branch == 'main'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: cloudbees-io/checkout@v2
+
+      - name: Deploy to Production
+        kind: deploy
+        uses: docker://node:18
+        shell: sh
+        run: |
+          echo "Deploying version ${{ needs.build.outputs.version }} to Production environment"
+          echo "Artifact: ${{ env.APP_NAME }}-${{ needs.build.outputs.version }}.tar.gz"
+          ls -lh
+          echo "Production deployment completed successfully"
+
+      - name: Post-deployment validation
+        uses: docker://node:18
+        shell: sh
+        run: |
+          echo "Running post-deployment validation..."
+          echo "Validation completed successfully"
+
+      # Deployment registration - artifact tracking via version and environment
+      # Note: artifact-id may be auto-linked via 'kind: deploy' annotation

@@ -1,0 +1,71 @@
+# CloudBees Unify Environment Configuration
+# This file defines the deployment environments for this project
+# Use this to pre-create environments in CloudBees Unify
+
+environments:
+  - name: development
+    description: Development environment for feature testing and integration
+    type: non-production
+    url: https://dev.example.com
+    promotion_order: 1
+    auto_deploy: true
+    require_approval: false
+    tags:
+      - dev
+      - non-prod
+      - automated
+
+  - name: staging
+    description: Staging environment for pre-production validation
+    type: non-production
+    url: https://staging.example.com
+    promotion_order: 2
+    auto_deploy: true
+    require_approval: false
+    tags:
+      - staging
+      - non-prod
+      - automated
+
+  - name: production
+    description: Production environment for live customer traffic
+    type: production
+    url: https://prod.example.com
+    promotion_order: 3
+    auto_deploy: false
+    require_approval: true
+    tags:
+      - prod
+      - production
+      - manual-approval
+
+# DORA Metrics Configuration
+dora_metrics:
+  # Deployment Frequency: How often deployments occur
+  deployment_frequency:
+    target: daily
+    measurement_window: 7d
+
+  # Lead Time for Changes: Time from commit to production deployment
+  lead_time:
+    target: 1h
+    measurement_window: 30d
+
+  # Change Failure Rate: Percentage of deployments causing a failure
+  change_failure_rate:
+    target: 15%
+    measurement_window: 30d
+
+  # Mean Time to Recovery: Time to restore service after an incident
+  mttr:
+    target: 1h
+    measurement_window: 30d
+
+# Component Configuration
+component:
+  name: sdlc-metrics-demo
+  type: service
+  team: platform-engineering
+  repository: ${{ github.repository }}
+  primary_language: javascript
+  framework: express
