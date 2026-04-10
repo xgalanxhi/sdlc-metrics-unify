@@ -94,7 +94,7 @@ jobs:
 
       - name: Register Build Artifact in CloudBees Unify
         id: register-artifact
-        uses: cloudbees-io/register-build-artifact@v1
+        uses: cloudbees-io/register-build-artifact@v2
         with:
           name: ${{ cloudbees.scm.repositoryUrl }}
           version: ${{ steps.version.outputs.version }}
@@ -151,7 +151,7 @@ jobs:
           echo "Deployment completed successfully"
 
       - name: Register Deployed Artifact to Development
-        uses: cloudbees-io/register-deployed-artifact@v1
+        uses: cloudbees-io/register-deployed-artifact@v2
         with:
           artifact-id: ${{ needs.build.outputs.artifact_id }}
           target-environment: development
@@ -175,7 +175,7 @@ jobs:
           echo "Deployment completed successfully"
 
       - name: Register Deployed Artifact to Staging
-        uses: cloudbees-io/register-deployed-artifact@v1
+        uses: cloudbees-io/register-deployed-artifact@v2
         with:
           artifact-id: ${{ needs.build.outputs.artifact_id }}
           target-environment: staging
@@ -207,7 +207,7 @@ jobs:
 
       - name: Register Deployed Artifact to Production
         if: always()
-        uses: cloudbees-io/register-deployed-artifact@v1
+        uses: cloudbees-io/register-deployed-artifact@v2
         with:
           artifact-id: ${{ needs.build.outputs.artifact_id }}
           target-environment: production
