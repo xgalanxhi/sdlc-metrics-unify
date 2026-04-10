@@ -1,0 +1,2012 @@
+= CloudBees Unify Workflows - Analytics Metrics Demo Repository
+:author: Zachary Stace (zstace) / Xhesi Galanxhi (xgalanxhi)
+:revdate: 2026-04-10
+:revnumber: 2.0
+:product-area: Analytics
+:edition-required: All editions
+:journey-slug: analytics/cloudbees-workflows-metrics
+:demo-repo: https://github.com/xgalanxhi/sdlc-metrics-unify
+:toc: left
+:toclevels: 3
+
+[cols="1,2"]
+|===
+|**Author(s)**
+|**Details**
+
+|Zachary Stace (zstace)
+|Team: PS
+
+Date: 2026-04-08
+
+|**Required Check(s)**
+|**Status**
+
+|PS Official
+|Pending
+
+|ENG Approval
+|Pending
+
+|===
+
+'''
+
+[[quick-start]]
+== Quick Start
+
+**Want to get started immediately?** Follow these three steps:
+
+1. **Fork the repository**: https://github.com/xgalanxhi/sdlc-metrics-unify (click Fork button)
+2. **Create a component in CloudBees Unify**: Connect your forked repository
+3. **Run the workflow**: Trigger the `CI/CD Pipeline` workflow from the Runs tab
+
+Your analytics dashboards will populate immediately with test results, build artifacts, and deployment data.
+
+*Continue reading for detailed instructions and explanations of each analytics dashboard.*
+
+'''
+
+[[qualification]]
+== Qualification Criteria
+
+=== Overall Requirements
+
+Before proceeding with CloudBees Unify workflows and analytics adoption, the customer must meet ALL of the following requirements:
+
+==== 1. CloudBees Unify Account
+
+[cols="30%,70%",options="header"]
+|===
+| Requirement
+| Details
+
+| *Active Unify Account*
+| Must have access to CloudBees Unify (any edition)
+
+| *Edition*
+| Available in all editions (Free, Team, Enterprise)
+
+| *Organization Access*
+| User must have appropriate permissions to create components and workflows
+
+| *Rationale*
+| CloudBees Unify workflows and analytics require an active account with component creation permissions
+
+| *How to Validate*
+| Log in to https://cloudbees.io and verify you can access your organization
+|===
+
+==== 2. Source Code Repository
+
+[cols="30%,70%",options="header"]
+|===
+| Requirement
+| Details
+
+| *Repository Access*
+| Must have a source code repository (GitHub, GitLab, Bitbucket, etc.)
+
+| *Repository Permissions*
+| Write access to create `.cloudbees/workflows/` directory
+
+| *Rationale*
+| CloudBees Unify workflows are defined in `.cloudbees/workflows/` directory in your repository
+
+| *How to Validate*
+| Verify you can commit and push to your repository
+|===
+
+==== 3. Component Created in CloudBees Unify
+
+[cols="30%,70%",options="header"]
+|===
+| Requirement
+| Details
+
+| *Component Exists*
+| At least one component connected to your source repository
+
+| *SCM Integration*
+| Repository connected via SCM integration (GitHub, GitLab, Bitbucket)
+
+| *Rationale*
+| Components are the foundation for running workflows and collecting analytics
+
+| *How to Validate*
+| Navigate to Components in CloudBees Unify and verify your component appears
+|===
+
+[[overview]]
+== Overview
+
+This guide demonstrates how to create CloudBees Unify workflows and populate analytics dashboards using a **ready-to-use demo repository** with native CloudBees actions.
+
+*Demo Repository*: https://github.com/xgalanxhi/sdlc-metrics-unify
+
+*Workflow Format*: `.cloudbees/workflows/` using CloudBees DSL (`apiVersion: automation.cloudbees.io/v1alpha1`)
+
+*Actions Used*: Native `cloudbees-io/*` actions
+
+=== What This Journey Provides
+
+This journey provides a **pre-configured demo repository** that you can fork and connect to CloudBees Unify to immediately start populating analytics dashboards.
+
+The repository includes:
+
+* *Complete CI/CD Workflow*: Pre-built workflow with test, lint, build, and deployment jobs
+* *Analytics Actions*: All CloudBees actions needed for metrics (build artifacts, deployments, test results, evidence)
+* *Multi-Environment Pipeline*: Development, staging, and production deployments
+* *Production Failure Simulation*: Workflow input to test deployment failure scenarios
+* *Ready to Run*: Just fork, connect, and execute
+
+By the end of this guide, you will:
+
+* Fork the demo repository to your GitHub account
+* Create a component in CloudBees Unify connected to your forked repository
+* Execute the pre-configured workflow to populate analytics dashboards
+* Understand which CloudBees actions contribute to each metrics tab
+* View and interpret metrics across five analytics dashboards
+* Use this as a reference for implementing workflows in your own projects
+
+*Target Audience*: Teams adopting CloudBees Unify for CI/CD and analytics
+
+*Estimated Time*: 30-45 minutes
+
+=== Repository Structure
+
+The demo repository (`sdlc-metrics-unify`) contains:
+
+```
+sdlc-metrics-unify/
+├── .cloudbees/
+│   └── workflows/
+│       └── ci-cd.yaml          # CloudBees Unify workflow
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml           # GitHub Actions workflow (for comparison)
+├── src/
+│   ├── server.js               # Node.js Express application
+│   └── server.test.js          # Jest test suite
+├── package.json                # Node.js dependencies and scripts
+└── platform.adoc               # This documentation file
+```
+
+**Key Files**:
+
+* **`.cloudbees/workflows/ci-cd.yaml`**: Complete CI/CD pipeline with all CloudBees actions for analytics
+* **`.github/workflows/ci-cd.yml`**: Parallel GitHub Actions workflow showing equivalent functionality
+* **`src/server.js`**: Simple Express.js API with test coverage
+* **`package.json`**: Includes `test:ci` script that generates JUnit XML test results
+
+=== What You'll Accomplish
+
+**Immediate Results** (after first workflow run):
+
+* Software Delivery Activity metrics from build artifact registration
+* Test Insights dashboard populated with test results
+* Build evidence published
+
+**With Additional Configuration**:
+
+* Security Insights (add security scanning actions)
+* DORA Metrics (deployment tracking to production)
+* Flow Metrics (requires Jira integration)
+
+'''
+
+[[prerequisites]]
+== Prerequisites
+
+=== General Requirements
+
+*To Complete This Journey*:
+
+[cols="30%,70%",options="header"]
+|===
+| Requirement
+| Notes
+
+| *CloudBees Unify Account*
+| Active account with any edition (Free, Team, Enterprise)
+
+| *GitHub Account*
+| To fork the demo repository
+
+| *GitHub Access*
+| Ability to create a fork and connect it to CloudBees Unify
+
+| *Time Commitment*
+| 30-45 minutes for complete setup
+|===
+
+[[demo-repository]]
+=== Demo Repository
+
+This guide uses a pre-configured demo repository that includes all necessary workflows and actions.
+
+*Repository URL*: https://github.com/xgalanxhi/sdlc-metrics-unify
+
+*What's Included*:
+
+* CloudBees workflow in `.cloudbees/workflows/ci-cd.yaml`
+* GitHub workflow in `.github/workflows/ci-cd.yml` (for comparison)
+* Node.js application with tests
+* Complete CI/CD pipeline with artifact tracking, deployments, and evidence
+
+[[getting-started]]
+=== Getting Started: Fork the Repository
+
+Before connecting to CloudBees Unify, fork the demo repository to your GitHub account:
+
+. Navigate to https://github.com/xgalanxhi/sdlc-metrics-unify
+. Click the *Fork* button in the upper right
+. Select your GitHub account or organization as the destination
+. Click *Create fork*
+
+After forking, you'll have your own copy at: `https://github.com/<YOUR_GITHUB_USERNAME>/sdlc-metrics-unify`
+
+This forked repository will be connected to CloudBees Unify as a component in the next steps.
+
+'''
+
+[[implementation]]
+== Implementation
+
+[[component-setup]]
+=== Chapter 1: Component Creation and Workflow Setup
+
+This chapter covers creating a component in CloudBees Unify connected to your forked demo repository.
+
+**CloudBees Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/organizations-components/manage-components
+
+==== Understanding Components
+
+Components in CloudBees Unify are the foundation for running workflows and collecting analytics. Each component:
+
+* Connects to a source code repository
+* Executes workflows defined in `.cloudbees/workflows/`
+* Collects metrics and analytics data
+* Displays runs, artifacts, and test results
+
+==== Component Creation Steps
+
+===== Step 1: Ensure Repository is Forked
+
+Before creating a component, verify you have forked the demo repository (see <<getting-started>>):
+
+* Your forked repository should be at: `https://github.com/<YOUR_GITHUB_USERNAME>/sdlc-metrics-unify`
+* The repository should contain `.cloudbees/workflows/ci-cd.yaml`
+
+===== Step 2: Create a Component
+
+. Log in to https://cloudbees.io
+. Navigate to your organization
+. Click *Components* in the left navigation
+. Click *Create Component* button
+
+===== Step 3: Configure Component Details
+
+*Component Configuration*:
+
+. **Name**: Enter `sdlc-metrics-unify` (or your preferred name)
+. **Repository URL**: Enter your forked repository URL: `https://github.com/<YOUR_GITHUB_USERNAME>/sdlc-metrics-unify`
+. **SCM Provider**: Select *GitHub*
+. **Authentication**: Configure GitHub access (see tip below)
+. Click *Create*
+
+[TIP]
+====
+*SCM Integration Setup*:
+
+If you haven't connected your SCM provider yet:
+
+. Navigate to *Organization Settings* > *Integrations*
+. Select *Source Control Management*
+. Add your SCM provider (GitHub, GitLab, Bitbucket)
+. Follow the OAuth/App installation flow
+. Grant necessary repository permissions
+
+**Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/integrations/scm-integration
+====
+
+===== Step 4: Verify Workflow Files Exist
+
+The forked repository already contains a complete CloudBees workflow. Verify it exists:
+
+**Workflow Location**: `.cloudbees/workflows/ci-cd.yaml`
+
+The workflow includes:
+
+* **Test Job**: Runs Jest tests and publishes results to Test Insights
+* **Lint Job**: Runs ESLint code quality checks
+* **Security Scan Job**: Placeholder for security scanning
+* **Build Job**: Builds the application, registers build artifacts, adds labels, and publishes build evidence
+* **Deploy Jobs**: Three deployment jobs (dev, staging, production) with deployment artifact registration and evidence
+
+===== Step 5: Trigger Workflow Execution
+
+Since the forked repository already contains the workflow, you can trigger it manually:
+
+. Navigate to your component in CloudBees Unify
+. Click the *Runs* tab
+. Click *Run Workflow* button
+. Select the `CI/CD Pipeline` workflow
+. Configure workflow inputs:
+  * **prod_deployment_status**: Choose `success` or `failure` to simulate deployment outcomes
+. Click *Run*
+
+===== Step 6: Verify Workflow Execution
+
+. Navigate to your component in CloudBees Unify
+. Click *Runs* tab
+. Verify your workflow appears and executes
+. Check the run details for success/failure status
+
+[NOTE]
+====
+*Expected Result*:
+
+After pushing the workflow file:
+
+* Workflow appears in the component's Runs tab
+* First run triggers automatically on push to main branch
+* Run details show step execution and logs
+* Component dashboard updates with run statistics
+
+If the workflow doesn't trigger:
+
+* Verify the file is in `.cloudbees/workflows/` (not `.github/workflows/`)
+* Check the workflow YAML syntax is valid
+* Ensure the component is connected to the correct repository
+* Review component settings for branch configuration
+====
+
+'''
+
+[[software-delivery-activity]]
+=== Chapter 2: Software Delivery Activity
+
+The Software Delivery Activity dashboard provides visibility into build frequency, deployment patterns, and team productivity.
+
+**CloudBees Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/analytics/software-delivery-activity
+
+==== What This Dashboard Shows
+
+*Available Automatically*:
+
+* Workflow run frequency
+* Build success/failure rates
+* Workflow execution times
+* Activity trends over time
+
+*Requires CloudBees Actions*:
+
+* Build artifact tracking via `cloudbees-io/register-build-artifact@v2`
+* Deployment tracking via `cloudbees-io/register-deployed-artifact@v2`
+
+==== Available Metrics
+
+Once workflows are running, the following metrics populate:
+
+===== Build Activity
+
+* Total workflow runs
+* Success vs failure rates
+* Build duration trends
+* Build frequency per time period
+
+===== Artifact Tracking
+
+* Build artifacts registered
+* Artifact versions over time
+* Artifact deployment history
+
+===== Deployment Patterns
+
+* Deployment frequency
+* Deployment success rates
+* Time between builds and deployments
+
+==== Build Artifact Registration in Demo Workflow
+
+The demo workflow already includes build artifact registration using the `cloudbees-io/register-build-artifact@v2` action.
+
+**Action Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/artifact-management/register-build-artifact
+
+**From `.cloudbees/workflows/ci-cd.yaml` in the demo repository**:
+
+[source,yaml]
+----
+  build:
+    needs:
+      - test
+      - lint
+      - security-scan
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      artifact_id: ${{ steps.register-artifact.outputs.artifact-id }}
+    steps:
+      - name: Checkout code
+        uses: cloudbees-io/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Generate version and build
+        id: version
+        uses: docker://node:18
+        shell: sh
+        run: |
+          git config --global --add safe.directory /cloudbees/workspace
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          VERSION="1.0.${COMMIT_COUNT}-${SHORT_SHA}"
+          printf "%s" "$VERSION" > $CLOUDBEES_OUTPUTS/version
+          echo "Generated version: $VERSION"
+
+          npm ci
+          npm ci --production
+          mkdir -p dist
+          cp -r src/ dist/
+          cp -r node_modules/ dist/
+          cp package.json dist/
+
+          cd dist
+          tar -czf ../${{ env.APP_NAME }}-${VERSION}.tar.gz .
+
+      - name: Register Build Artifact in CloudBees Unify
+        id: register-artifact
+        uses: cloudbees-io/register-build-artifact@v2
+        with:
+          name: ${{ cloudbees.scm.repositoryUrl }}
+          url: https://artifacts.example.com/${{ env.APP_NAME }}/${{ steps.version.outputs.version }}
+          version: ${{ steps.version.outputs.version }}
+          type: Binary
+
+      - name: Add Labels to Artifact
+        uses: cloudbees-io/label-artifact-version@v1
+        with:
+          artifact-id: ${{ steps.register-artifact.outputs.artifact-id }}
+          labels: ${{ cloudbees.scm.branch }},nodejs,express,automated
+
+      - name: Publish Build Evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |-
+            # Build Evidence Report
+
+            ## Artifact Details
+            - **Repository**: ${{ cloudbees.scm.repositoryUrl }}
+            - **Version**: ${{ steps.version.outputs.version }}
+            - **Artifact ID**: ${{ steps.register-artifact.outputs.artifact-id }}
+            - **Type**: NPM Package
+            - **Branch**: ${{ cloudbees.scm.branch }}
+----
+
+**View the complete workflow**: https://github.com/xgalanxhi/sdlc-metrics-unify/blob/main/.cloudbees/workflows/ci-cd.yaml
+
+===== Artifact Registration Parameters
+
+[cols="30%,50%,20%",options="header"]
+|===
+| Parameter
+| Description
+| Required
+
+| `name`
+| Name of the artifact
+| Yes
+
+| `version`
+| Version identifier (typically commit SHA)
+| Yes
+
+| `url`
+| URL where artifact is stored
+| Yes
+
+| `digest`
+| Hash/checksum for artifact verification
+| No
+
+| `labels`
+| Comma-separated list of labels
+| No
+|===
+
+[TIP]
+====
+*Best Practices for Artifact Registration*:
+
+* Use commit SHA for version: `${{ cloudbees.scm.sha }}`
+* Use descriptive artifact names: `my-app-frontend`, `api-service`
+* Register artifacts only after successful build
+* Include digest when available for verification
+* Use labels for categorization: `production`, `staging`, `feature`
+====
+
+===== Full Example with Multiple Artifact Types
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Multi-Artifact Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-frontend:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Build frontend
+        uses: docker://node:20-alpine
+        run: |
+          npm install
+          npm run build
+
+      - name: Register frontend artifact
+        uses: cloudbees-io/register-build-artifact@v2
+        with:
+          name: my-app-frontend
+          version: ${{ cloudbees.scm.sha }}
+          url: s3://my-bucket/frontend-${{ cloudbees.scm.sha }}.tar.gz
+          labels: frontend,production
+
+  build-backend:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Build backend
+        uses: docker://maven:3.9-eclipse-temurin-17
+        run: |
+          mvn clean package
+
+      - name: Register backend artifact
+        uses: cloudbees-io/register-build-artifact@v2
+        with:
+          name: my-app-backend
+          version: ${{ cloudbees.scm.sha }}
+          url: docker.io/myorg/backend:${{ cloudbees.scm.sha }}
+          digest: sha256:abcdef1234567890
+          labels: backend,java,production
+----
+
+==== CloudBees Context Variables
+
+CloudBees workflows provide context variables for common values:
+
+[cols="40%,60%",options="header"]
+|===
+| Context Variable
+| Description
+
+| `${{ cloudbees.scm.sha }}`
+| Commit SHA of the current build
+
+| `${{ cloudbees.scm.ref }}`
+| Branch or tag reference
+
+| `${{ cloudbees.scm.repositoryUrl }}`
+| Repository clone URL
+
+| `${{ cloudbees.version }}`
+| Workflow version
+
+| `${{ cloudbees.run_id }}`
+| Unique run identifier
+|===
+
+==== Viewing Software Delivery Activity
+
+. Navigate to *Analytics* > *Software Delivery Activity* in CloudBees Unify
+. Select your component from the filter
+. Set time range (last 7 days, 30 days, etc.)
+
+*Metrics Available*:
+
+* Workflow run frequency chart
+* Build success rate percentage
+* Average build duration
+* Artifact registration history
+* Activity timeline
+
+[NOTE]
+====
+*Data Accumulation*:
+
+Software Delivery Activity metrics become more meaningful with accumulated data:
+
+* **After 1 day**: Basic activity visible
+* **After 1 week**: Trends start to emerge
+* **After 30 days**: Full historical analysis available
+
+Run workflows regularly to populate dashboards with rich data.
+====
+
+'''
+
+[[security-insights]]
+=== Chapter 3: Security Insights
+
+The Security Insights dashboard displays vulnerability data and security scanning results from your workflows.
+
+**CloudBees Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/analytics/security-insights
+
+==== What This Dashboard Shows
+
+* Security scan results from multiple scanner types
+* Vulnerability counts by severity (Critical, High, Medium, Low)
+* Security trends over time
+* Scan coverage and compliance metrics
+* Issue remediation tracking
+
+==== Available Security Scanners
+
+CloudBees Unify provides native security scanning actions that automatically populate Security Insights:
+
+===== Secret Scanners
+
+* `cloudbees-io/gitleaks-plugin@v1` - Detect secrets in Git history
+* `cloudbees-io/trufflehog-secret-scan-code@v1` - Detect secrets in source code
+* `cloudbees-io/trufflehog-secret-scan-container@v1` - Detect secrets in containers
+
+===== SAST Scanners (Static Application Security Testing)
+
+* `cloudbees-io/checkmarx-sast-scan-code@v1` - Checkmarx code analysis
+* `cloudbees-io/snyk-sast-scan-code@v1` - Snyk code vulnerabilities
+* `cloudbees-io/coverity-polaris-sast-scan-code@v1` - Coverity on Polaris
+* `cloudbees-io/sonarqube-plugin@v1` - SonarQube analysis
+* `cloudbees-io/gosec-plugin@v1` - Golang security checker
+
+===== Container Scanners
+
+* `cloudbees-io/trivy-plugin@v1` - Comprehensive container scanning
+* `cloudbees-io/snyk-scan-container@v1` - Snyk container vulnerabilities
+* `cloudbees-io/anchore-scan-container@v1` - Anchore Engine scanning
+
+===== SCA Scanners (Software Composition Analysis)
+
+* `cloudbees-io/snyk-sca-scan-dependency@v1` - Snyk dependency analysis
+* `cloudbees-io/blackduck-sca-scan-dependency@v1` - Black Duck SCA
+
+==== Example: Gitleaks Secret Scanning
+
+**Action Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/secret-scanners/gitleaks-plugin
+
+Gitleaks scans your repository for exposed secrets and credentials.
+
+===== Basic Gitleaks Workflow
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Security Scanning
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  secret-scan:
+    steps:
+      - name: Checkout code
+        uses: cloudbees-io/checkout@v1
+
+      - name: Scan for secrets
+        uses: cloudbees-io/gitleaks-plugin@v1
+----
+
+===== Gitleaks with Quality Gates
+
+The Gitleaks action provides output variables for quality gate decisions:
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Security with Quality Gates
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  security-scan:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - id: gitleaks
+        name: Scan for secrets
+        uses: cloudbees-io/gitleaks-plugin@v1
+
+      - name: Check scan results
+        uses: docker://alpine:latest
+        run: |
+          echo "Critical count: ${{ steps.gitleaks.outputs.critical-count }}"
+          echo "High count: ${{ steps.gitleaks.outputs.high-count }}"
+          if [ "${{ steps.gitleaks.outputs.critical-count }}" -gt "0" ]; then
+            echo "Critical vulnerabilities found!"
+            exit 1
+          fi
+----
+
+==== Example: Trivy Container Scanning
+
+**Action Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/container-scanners/trivy-plugin
+
+Trivy scans container images for vulnerabilities.
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Container Security
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-scan:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Build container image
+        uses: docker://docker:24-dind
+        run: |
+          docker build -t myapp:${{ cloudbees.scm.sha }} .
+
+      - name: Scan container
+        uses: cloudbees-io/trivy-plugin@v1
+        with:
+          image-location: myapp:${{ cloudbees.scm.sha }}
+          scan-type: image
+----
+
+==== Example: SonarQube SAST Scanning
+
+**Action Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/sast-scanners/sonarqube-plugin
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Code Quality Scan
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sonarqube-scan:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Run SonarQube scan
+        uses: cloudbees-io/sonarqube-plugin@v1
+        with:
+          server-url: ${{ vars.SONAR_URL }}
+          token: ${{ secrets.SONAR_TOKEN }}
+          project-key: my-project
+----
+
+==== Example: Multi-Scanner Security Pipeline
+
+Combine multiple scanners in a comprehensive security workflow:
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Comprehensive Security Scan
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  secret-detection:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Gitleaks scan
+        uses: cloudbees-io/gitleaks-plugin@v1
+
+  code-analysis:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: SonarQube analysis
+        uses: cloudbees-io/sonarqube-plugin@v1
+        with:
+          server-url: ${{ vars.SONAR_URL }}
+          token: ${{ secrets.SONAR_TOKEN }}
+          project-key: my-project
+
+  dependency-scan:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Snyk dependency scan
+        uses: cloudbees-io/snyk-sca-scan-dependency@v1
+        with:
+          orgname: ${{ vars.SNYK_ORG }}
+          token: ${{ secrets.SNYK_TOKEN }}
+
+  container-scan:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Build image
+        uses: docker://docker:24-dind
+        run: |
+          docker build -t myapp:latest .
+
+      - name: Trivy scan
+        uses: cloudbees-io/trivy-plugin@v1
+        with:
+          image-location: myapp:latest
+          scan-type: image
+----
+
+==== Viewing Security Insights
+
+. Navigate to *Analytics* > *Security Insights* in CloudBees Unify
+. Select your component from the filter
+. View security scan results
+
+*Expected Data*:
+
+* Vulnerability counts by severity (Critical, High, Medium, Low)
+* Security scan history and trends
+* Scan coverage metrics
+* Remediation status tracking
+* Compliance reporting
+
+[NOTE]
+====
+*Troubleshooting*:
+
+If Security Insights data doesn't appear:
+
+* Verify security action is present in workflow file
+* Check workflow run logs for errors
+* Ensure component is correctly configured
+* Wait for workflow to complete successfully
+* Contact CloudBees support if issues persist
+====
+
+'''
+
+[[test-insights]]
+=== Chapter 4: Test Insights
+
+The Test Insights dashboard provides comprehensive test analytics including execution results, coverage trends, flaky test detection, and performance metrics.
+
+**CloudBees Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/analytics/test-insights
+
+**Action Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/testing/publish-test-results
+
+==== What This Dashboard Shows
+
+* Test execution results (pass/fail/skip)
+* Test coverage percentages and trends
+* Flaky test identification
+* Test performance and duration
+* Test suite health over time
+* Test execution history
+
+==== Configuration
+
+Test Insights requires the `cloudbees-io/publish-test-results@v2` action to upload test results to CloudBees Unify.
+
+===== Basic Test Workflow
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Test Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Run tests
+        uses: docker://maven:3.9-eclipse-temurin-17
+        run: |
+          mvn test
+
+      - name: Publish test results
+        uses: cloudbees-io/publish-test-results@v2
+        with:
+          test-type: junit
+          results-path: target/surefire-reports/*.xml
+----
+
+===== Test Results Parameters
+
+[cols="30%,50%,20%",options="header"]
+|===
+| Parameter
+| Description
+| Required
+
+| `results-path`
+| Path to test result files (supports glob patterns)
+| Yes
+
+| `test-type`
+| Testing tool name (junit, jest, go, testng, etc.)
+| Yes
+|===
+
+[IMPORTANT]
+====
+*Supported Test Types*:
+
+The `publish-test-results` action supports the following test frameworks:
+
+* **GO** - `test-type: go` or `test-type: GO`
+* **Jest** - `test-type: jest` or `test-type: JEST`
+* **JMeter** - `test-type: jmeter` or `test-type: JMETER`
+* **JUnit** - `test-type: junit` or `test-type: JUNIT`
+* **MSTest** - `test-type: mstest` or `test-type: MSTEST`
+* **Playwright** - `test-type: playwright` or `test-type: PLAYWRIGHT`
+* **ProdPerfect** - `test-type: prodperfect` or `test-type: PRODPERFECT`
+* **Selenium** - `test-type: selenium` or `test-type: SELENIUM`
+* **TestNG** - `test-type: testng` or `test-type: TESTNG`
+* **Tosca** - `test-type: tosca` or `test-type: TOSCA`
+
+All test types accept results in JUnit XML format.
+====
+
+==== Test Framework Examples
+
+===== JavaScript (Jest)
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: JavaScript Tests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Run Jest tests
+        uses: docker://node:20-alpine
+        run: |
+          npm install
+          npm test -- --reporters=jest-junit
+        env:
+          JEST_JUNIT_OUTPUT_DIR: ./test-results
+
+      - name: Publish test results
+        uses: cloudbees-io/publish-test-results@v2
+        with:
+          test-type: jest
+          results-path: test-results/junit.xml
+----
+
+===== Python (pytest)
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Python Tests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Run pytest
+        uses: docker://python:3.11-slim
+        run: |
+          pip install pytest pytest-cov
+          pytest --junit-xml=test-results/junit.xml --cov=app
+
+      - name: Publish test results
+        uses: cloudbees-io/publish-test-results@v2
+        with:
+          test-type: junit
+          results-path: test-results/junit.xml
+----
+
+===== Java (Maven)
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Java Tests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Run Maven tests
+        uses: docker://maven:3.9-eclipse-temurin-17
+        run: |
+          mvn test
+
+      - name: Publish test results
+        uses: cloudbees-io/publish-test-results@v2
+        with:
+          test-type: junit
+          results-path: target/surefire-reports/*.xml
+----
+
+===== Go Tests
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Go Tests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Run Go tests
+        uses: docker://golang:1.22-alpine
+        run: |
+          go install github.com/jstemmer/go-junit-report@latest
+          mkdir test-results
+          go test -v ./... 2>&1 | go-junit-report > test-results/junit.xml
+
+      - name: Publish test results
+        uses: cloudbees-io/publish-test-results@v2
+        with:
+          test-type: go
+          results-path: test-results/junit.xml
+----
+
+==== Multiple Test Suites
+
+For repositories with multiple test types, create separate jobs:
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Multi-Suite Testing
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  unit-tests:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Run unit tests
+        uses: docker://node:20-alpine
+        run: |
+          npm install
+          npm run test:unit -- --reporters=jest-junit
+        env:
+          JEST_JUNIT_OUTPUT_DIR: ./unit-results
+
+      - name: Publish unit test results
+        uses: cloudbees-io/publish-test-results@v2
+        with:
+          test-type: jest
+          results-path: unit-results/junit.xml
+
+  integration-tests:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Run integration tests
+        uses: docker://node:20-alpine
+        run: |
+          npm install
+          npm run test:integration -- --reporters=jest-junit
+        env:
+          JEST_JUNIT_OUTPUT_DIR: ./integration-results
+
+      - name: Publish integration test results
+        uses: cloudbees-io/publish-test-results@v2
+        with:
+          test-type: jest
+          results-path: integration-results/junit.xml
+----
+
+[TIP]
+====
+*Best Practices for Test Results*:
+
+* Use descriptive test-type values
+* Separate test suites into different jobs for clarity
+* Ensure test frameworks output JUnit XML format
+* Use glob patterns to capture multiple result files: `test-results/*.xml`
+* Test results are published even if tests fail
+====
+
+==== Viewing Test Insights
+
+. Navigate to *Analytics* > *Test Insights* in CloudBees Unify
+. Select your component from the filter
+. View test analytics including:
+  * Pass/fail/skip rates
+  * Test duration trends
+  * Flaky test detection
+  * Test coverage (if reported)
+
+
+
+'''
+
+[[dora-metrics]]
+=== Chapter 5: DORA Metrics
+
+DORA (DevOps Research and Assessment) metrics are industry-standard measures of software delivery performance, including Deployment Frequency, Lead Time for Changes, Mean Time to Recovery, and Change Failure Rate.
+
+**CloudBees Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/analytics/dora-metrics
+
+**Action Documentation**: https://docs.cloudbees.com/docs/cloudbees-unify/latest/artifact-management/register-deployed-artifact
+
+==== What This Dashboard Shows
+
+* **Deployment Frequency**: How often code is deployed to production
+* **Lead Time for Changes**: Time from commit to production deployment
+* **Mean Time to Recovery (MTTR)**: Time to recover from failures
+* **Change Failure Rate**: Percentage of deployments causing failures
+
+==== Configuration
+
+DORA Metrics are populated using the `cloudbees-io/register-deployed-artifact@v2` action to track deployments.
+
+==== Registering Deployments
+
+To track deployments for DORA metrics, use `register-deployed-artifact` in your deployment workflow:
+
+===== Basic Deployment Registration
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Deploy application
+        uses: docker://kubectl:latest
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+
+      - name: Register deployment
+        uses: cloudbees-io/register-deployed-artifact@v2
+        with:
+          name: my-app
+          version: ${{ cloudbees.scm.sha }}
+          url: docker.io/myorg/myapp:${{ cloudbees.scm.sha }}
+          environment: production
+----
+
+===== Deployment Parameters
+
+[cols="30%,50%,20%",options="header"]
+|===
+| Parameter
+| Description
+| Required
+
+| `name`
+| Artifact name
+| Yes
+
+| `version`
+| Version being deployed (typically commit SHA)
+| Yes
+
+| `url`
+| Location of the deployed artifact
+| Yes
+
+| `environment`
+| Target environment (production, staging, etc.)
+| Yes
+
+| `status`
+| Deployment status (success, failure)
+| No
+|===
+
+==== Complete Build and Deploy Example
+
+This example shows the full pipeline from build to deployment with DORA tracking:
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Build application
+        uses: docker://maven:3.9-eclipse-temurin-17
+        run: |
+          mvn clean package
+
+      - name: Build Docker image
+        uses: docker://docker:24-dind
+        run: |
+          docker build -t myorg/myapp:${{ cloudbees.scm.sha }} .
+          docker push myorg/myapp:${{ cloudbees.scm.sha }}
+
+      - name: Register build artifact
+        uses: cloudbees-io/register-build-artifact@v2
+        with:
+          name: my-app
+          version: ${{ cloudbees.scm.sha }}
+          url: docker.io/myorg/myapp:${{ cloudbees.scm.sha }}
+
+  deploy-staging:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Deploy to staging
+        uses: docker://kubectl:latest
+        run: |
+          kubectl set image deployment/myapp myapp=myorg/myapp:${{ cloudbees.scm.sha }} -n staging
+
+      - name: Register staging deployment
+        uses: cloudbees-io/register-deployed-artifact@v2
+        with:
+          name: my-app
+          version: ${{ cloudbees.scm.sha }}
+          url: docker.io/myorg/myapp:${{ cloudbees.scm.sha }}
+          environment: staging
+
+  deploy-production:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+
+      - name: Deploy to production
+        uses: docker://kubectl:latest
+        run: |
+          kubectl set image deployment/myapp myapp=myorg/myapp:${{ cloudbees.scm.sha }} -n production
+
+      - name: Register production deployment
+        uses: cloudbees-io/register-deployed-artifact@v2
+        with:
+          name: my-app
+          version: ${{ cloudbees.scm.sha }}
+          url: docker.io/myorg/myapp:${{ cloudbees.scm.sha }}
+          environment: production
+----
+
+==== Tracking Deployment Failures
+
+To track change failure rate, register deployments with status:
+
+[source,yaml]
+----
+      - name: Deploy with error handling
+        id: deploy
+        uses: docker://kubectl:latest
+        run: |
+          kubectl apply -f k8s/deployment.yaml || exit 1
+
+      - name: Register successful deployment
+        if: success()
+        uses: cloudbees-io/register-deployed-artifact@v2
+        with:
+          name: my-app
+          version: ${{ cloudbees.scm.sha }}
+          url: docker.io/myorg/myapp:${{ cloudbees.scm.sha }}
+          environment: production
+          status: success
+
+      - name: Register failed deployment
+        if: failure()
+        uses: cloudbees-io/register-deployed-artifact@v2
+        with:
+          name: my-app
+          version: ${{ cloudbees.scm.sha }}
+          url: docker.io/myorg/myapp:${{ cloudbees.scm.sha }}
+          environment: production
+          status: failure
+----
+
+==== Multi-Environment Deployment
+
+Track deployments across multiple environments:
+
+[source,yaml]
+----
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: Progressive Deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-dev:
+    steps:
+      - name: Deploy to dev
+        uses: docker://kubectl:latest
+        run: kubectl apply -f k8s/dev/
+
+      - name: Register dev deployment
+        uses: cloudbees-io/register-deployed-artifact@v2
+        with:
+          name: my-app
+          version: ${{ cloudbees.scm.sha }}
+          url: docker.io/myorg/myapp:${{ cloudbees.scm.sha }}
+          environment: dev
+
+  deploy-staging:
+    steps:
+      - name: Deploy to staging
+        uses: docker://kubectl:latest
+        run: kubectl apply -f k8s/staging/
+
+      - name: Register staging deployment
+        uses: cloudbees-io/register-deployed-artifact@v2
+        with:
+          name: my-app
+          version: ${{ cloudbees.scm.sha }}
+          url: docker.io/myorg/myapp:${{ cloudbees.scm.sha }}
+          environment: staging
+
+  deploy-production:
+    steps:
+      - name: Deploy to production
+        uses: docker://kubectl:latest
+        run: kubectl apply -f k8s/production/
+
+      - name: Register production deployment
+        uses: cloudbees-io/register-deployed-artifact@v2
+        with:
+          name: my-app
+          version: ${{ cloudbees.scm.sha }}
+          url: docker.io/myorg/myapp:${{ cloudbees.scm.sha }}
+          environment: production
+----
+
+==== Viewing DORA Metrics
+
+. Navigate to *Analytics* > *DORA Metrics* in CloudBees Unify
+. Select your component from the filter
+. View metrics:
+  * **Deployment Frequency**: Deployments per day/week/month
+  * **Lead Time for Changes**: Time from commit to production
+  * **MTTR**: Average time to recover from failures
+  * **Change Failure Rate**: Percentage of failed deployments
+
+[NOTE]
+====
+*Data Requirements*:
+
+DORA metrics require consistent data over time:
+
+* **Deployment Frequency**: At least one deployment registered
+* **Lead Time**: Build and deployment registrations linked by version
+* **MTTR**: Deployment failure and recovery events tracked
+* **Change Failure Rate**: Deployment status tracked (success/failure)
+
+Metrics become more accurate with 2-4 weeks of data.
+====
+
+'''
+
+[[flow-metrics]]
+=== Chapter 6: Flow Metrics
+
+Flow Metrics track work item efficiency, lead time, cycle time, and bottleneck identification throughout the software delivery lifecycle.
+
+==== What This Dashboard Shows
+
+* Lead time from issue creation to deployment
+* Cycle time for work items
+* Work in progress (WIP) trends
+* Bottleneck identification
+* Flow efficiency metrics
+* Workload distribution and capacity planning
+
+==== Configuration Requirements
+
+[IMPORTANT]
+.JIRA INTEGRATION REQUIRED
+====
+**Flow Metrics require Jira integration to light up.**
+
+*Requirements*:
+
+* Jira instance connected to CloudBees Unify
+* Flow items mapping configured in Analytics Configuration
+* Work items (issues, stories) linked to commits/PRs via ticket IDs
+
+*Important*: Webhooks are NOT required. Flow Metrics use scheduled batch polling and event triggers.
+====
+
+==== How Flow Metrics Data Synchronization Works
+
+CloudBees Unify collects Flow Metrics data through scheduled polling and automatic event triggers, eliminating the need for webhook configuration.
+
+===== Default Polling Intervals
+
+[cols="40%,60%",options="header"]
+|===
+| Data Type
+| Polling Frequency
+
+| Projects
+| Every 24 hours
+
+| Issues
+| Every 3 hours
+
+| Issue Type Mappings
+| Every 24 hours
+|===
+
+===== Immediate Processing Triggers
+
+Data synchronization is triggered immediately when:
+
+* **Endpoint CREATE/UPDATE Events**: When a Jira endpoint is created or updated in CloudBees Unify
+* **Analytics Config Updates**: When Flow item mappings are modified in Analytics Configuration
+
+[TIP]
+====
+After configuring or modifying Jira integration or Flow item mappings, data will begin syncing immediately. For routine updates, polling occurs automatically at the intervals above.
+====
+
+==== Configuration Steps
+
+===== Step 1: Configure Jira Integration
+
+. Log in to CloudBees Unify
+. Navigate to *Integrations*
+. Add or configure your Jira integration
+. Provide Jira instance URL and authentication credentials
+. Verify connection is successful
+
+[NOTE]
+====
+This step assumes you have administrative access to configure integrations in CloudBees Unify. Contact your CloudBees administrator if you need assistance with Jira integration setup.
+====
+
+===== Step 2: Configure Flow Items Mapping
+
+Flow items mapping tells CloudBees Unify which Jira issue types correspond to which flow categories.
+
+. Navigate to *Analytics* > *Analytics Configuration*
+. Locate the *Flow Items Mapping* section
+. Map your Jira issue types to flow categories:
+
+[cols="30%,70%",options="header"]
+|===
+| Flow Category
+| Description
+
+| Feature
+| User stories, new features, enhancements
+
+| Defect
+| Bugs, issues, defects
+
+| Risk
+| Security vulnerabilities, technical risks
+
+| Technical Debt
+| Refactoring, code improvements, tech debt items
+|===
+
+*Mapping Options*:
+
+* **By Issue Type**: Select Jira issue types (Story, Bug, Task, etc.)
+* **By JQL Query**: Use Jira Query Language for advanced filtering
+
+[source,text]
+----
+Example JQL Mappings:
+
+Feature: issuetype = Story OR issuetype = Epic
+Defect: issuetype = Bug
+Risk: labels = "security" OR labels = "risk"
+Technical Debt: labels = "tech-debt" OR issuetype = "Technical Debt"
+----
+
+[TIP]
+====
+*Best Practices for Flow Item Mapping*:
+
+* Use consistent issue types across your Jira projects
+* Leverage labels for cross-cutting concerns (security, tech-debt)
+* Test mappings with JQL queries in Jira first
+* Ensure all active issue types are mapped to at least one category
+====
+
+===== Step 3: Link Commits to Jira Issues
+
+To enable tracking from code commits to Jira issues, include Jira ticket IDs in commit messages.
+
+*Commit Message Patterns*:
+
+[source,text]
+----
+# Bracket notation
+feat: add user authentication [PROJ-123]
+
+# Parentheses notation
+fix: resolve login timeout issue (PROJ-456)
+
+# Prefix notation
+PROJ-789: implement dashboard widgets
+
+# Multiple tickets
+PROJ-123 PROJ-456: refactor authentication module
+----
+
+CloudBees Unify automatically detects Jira issue keys (e.g., `PROJ-123`) in commit messages and links them to work items.
+
+[IMPORTANT]
+====
+*Ticket ID Format*:
+
+Jira ticket IDs must follow the standard format: `PROJECT-NUMBER`
+
+* Valid: `PROJ-123`, `ABC-456`, `PLATFORM-789`
+* Invalid: `proj-123` (lowercase), `123-PROJ` (reversed)
+====
+
+==== Validation and Testing
+
+Follow these steps to verify Flow Metrics are working correctly:
+
+===== Test Scenario: Complete Issue Lifecycle
+
+. **Create or Select a Jira Ticket**
+   * Ensure ticket is in "In Progress" status
+   * Note the ticket ID (e.g., `PROJ-123`)
+
+. **Add Activity in Jira**
+   * Add a comment to the ticket
+   * Update ticket fields as needed
+
+. **Commit Changes with Ticket ID**
+   * Make code changes in your repository
+   * Commit with ticket ID in message:
+   +
+   [source,bash]
+   ----
+   git commit -m "PROJ-123: implement new feature"
+   git push origin main
+   ----
+
+. **Verify Data in Workload Widget**
+   * Navigate to *Analytics* > *Flow Metrics*
+   * Check the *Workload Widget*
+   * Ticket should appear with commit activity
+
+. **Complete the Ticket**
+   * Move ticket to "Done" status in Jira
+   * Wait for polling cycle (up to 3 hours) or trigger immediate sync by updating Analytics Configuration
+
+. **Verify Completion in Dashboard**
+   * Refresh Flow Metrics dashboard
+   * Ticket should reflect "Done" status
+   * Cycle time and lead time metrics should be calculated
+
+[NOTE]
+====
+*Data Refresh Timing*:
+
+* **Immediate**: If you modify Analytics Configuration after committing
+* **Within 3 hours**: For issue status updates (next polling cycle)
+* **Manual refresh**: Reload the dashboard page to see latest data
+====
+
+==== What Flow Metrics Provides
+
+===== Lead Time
+
+* Total time from issue creation to deployment
+* Breakdown by phase (backlog, development, review, deployment)
+* Trends and optimization opportunities
+* Comparison across issue types
+
+===== Cycle Time
+
+* Time from first commit to deployment
+* Active development time tracking
+* Efficiency measurements
+* Work item aging analysis
+
+===== Flow Efficiency
+
+* Percentage of time spent in active work vs waiting
+* Bottleneck identification
+* Wait time analysis by stage
+* Process improvement insights
+
+===== Work in Progress (WIP)
+
+* Number of active work items by category
+* WIP trends and patterns over time
+* Capacity planning data
+* Workload distribution across team
+
+===== Workload Widgets
+
+* Visual representation of work distribution
+* Work item breakdown by category (Feature, Defect, Risk, Technical Debt)
+* Team capacity utilization
+* Historical trends
+
+==== Demo Workflow Reference
+
+The demonstration workflow in this repository supports Flow Metrics by enabling you to:
+
+* Use descriptive commit messages with Jira ticket IDs
+* Follow PR-based development workflow
+* Link commits to work items via issue references in commit messages
+
+**CloudBees Workflow**: https://github.com/xgalanxhi/sdlc-metrics-unify/blob/main/.cloudbees/workflows/ci-cd.yaml
+
+**GitHub Workflow (for comparison)**: https://github.com/xgalanxhi/sdlc-metrics-unify/blob/main/.github/workflows/ci-cd.yml
+
+When working with your forked repository, include Jira ticket IDs in commit messages (e.g., `PROJ-123: add feature`) to populate Flow Metrics.
+
+'''
+
+
+[[summary]]
+== Summary
+
+=== What You Accomplished
+
+*Core Integration*:
+
+1. Forked the demo repository (https://github.com/xgalanxhi/sdlc-metrics-unify) to your GitHub account
+2. Created a component in CloudBees Unify connected to your forked repository
+3. Executed the pre-configured CI/CD workflow
+4. Populated multiple analytics dashboards with workflow data
+5. Learned which CloudBees actions drive each analytics dashboard
+
+*Analytics Dashboards Populated*:
+
+[cols="40%,30%,30%",options="header"]
+|===
+| Dashboard
+| Status
+| Configuration Level
+
+| Software Delivery Activity
+|  Partial
+| ~50% functional (deployment tracking pending)
+
+| Security Insights
+|  Full
+| Works with implicit scans OR CloudBees security actions
+
+| Test Insights
+|  Full
+| Requires `publish-test-results@v2` action
+
+| DORA Metrics
+|  Blocked
+| Requires unreleased `register-deployment` action
+
+| Flow Metrics
+|  Full
+| Requires Jira integration and Flow items mapping
+|===
+
+=== Key CloudBees Actions
+
+*Actions Used in This Guide*:
+
+* `cloudbees-io/register-build-artifact@v2` - Build and artifact tracking
+* `cloudbees-io/register-deployed-artifact@v2` - Deployment tracking for DORA metrics
+* `cloudbees-io/publish-test-results@v2` - Test insights
+* `cloudbees-io/gitleaks-plugin@v1` - Secret scanning
+* `cloudbees-io/trivy-plugin@v1` - Container security scanning
+* `cloudbees-io/sonarqube-plugin@v1` - Code quality analysis
+
+*Automatic Workflow Metrics*:
+
+* Workflow execution frequency
+* Build success/failure rates
+* Workflow duration trends
+
+
+=== Next Steps: Apply to Your Own Projects
+
+Now that you've seen how the demo repository populates CloudBees Unify analytics, apply these patterns to your own projects:
+
+**1. Reference the Demo Workflow**
+
+* Review `.cloudbees/workflows/ci-cd.yaml` in your forked repository
+* Identify the CloudBees actions used for each analytics dashboard
+* Note the workflow structure and job dependencies
+
+**2. Create Workflows in Your Repository**
+
+* Create `.cloudbees/workflows/` directory in your project repository
+* Copy relevant sections from the demo workflow
+* Adapt build, test, and deployment steps to your technology stack
+* Keep the CloudBees analytics actions (`register-build-artifact`, `publish-test-results`, etc.)
+
+**3. Connect Your Repository**
+
+* Create a new component in CloudBees Unify for your project
+* Connect it to your repository
+* Trigger the workflow and verify analytics populate
+
+**4. Iterate and Enhance**
+
+* Add security scanning actions for Security Insights
+* Configure Jira integration for Flow Metrics
+* Track deployments to production for DORA Metrics
+* Build evidence and labels as needed
+
+**5. Use Both Workflows as Reference**
+
+The demo repository includes both CloudBees and GitHub Actions workflows:
+
+* **CloudBees Workflow**: `.cloudbees/workflows/ci-cd.yaml` - Use this as your primary reference
+* **GitHub Workflow**: `.github/workflows/ci-cd.yml` - Compare the two approaches to understand platform differences
+
+=== Additional Resources
+
+*Demo Repository*:
+
+* **GitHub**: https://github.com/xgalanxhi/sdlc-metrics-unify
+* **CloudBees Workflow**: https://github.com/xgalanxhi/sdlc-metrics-unify/blob/main/.cloudbees/workflows/ci-cd.yaml
+* **GitHub Workflow**: https://github.com/xgalanxhi/sdlc-metrics-unify/blob/main/.github/workflows/ci-cd.yml
+
+*CloudBees Documentation*:
+
+**Analytics Dashboards**:
+
+* Software Delivery Activity: https://docs.cloudbees.com/docs/cloudbees-unify/latest/analytics/software-delivery-activity
+* Security Insights: https://docs.cloudbees.com/docs/cloudbees-unify/latest/analytics/security-insights
+* Test Insights: https://docs.cloudbees.com/docs/cloudbees-unify/latest/analytics/test-insights
+* DORA Metrics: https://docs.cloudbees.com/docs/cloudbees-unify/latest/analytics/dora-metrics
+* Flow Metrics: https://docs.cloudbees.com/docs/cloudbees-unify/latest/analytics/flow-metrics
+
+**CloudBees Native Actions**:
+
+* Actions Overview: https://docs.cloudbees.com/docs/cloudbees-unify/latest/actions
+* Register Build Artifact: https://docs.cloudbees.com/docs/cloudbees-unify/latest/artifact-management/register-build-artifact
+* Register Deployed Artifact: https://docs.cloudbees.com/docs/cloudbees-unify/latest/artifact-management/register-deployed-artifact
+* Publish Test Results: https://docs.cloudbees.com/docs/cloudbees-unify/latest/testing/publish-test-results
+* Gitleaks Plugin: https://docs.cloudbees.com/docs/cloudbees-unify/latest/secret-scanners/gitleaks-plugin
+* Trivy Plugin: https://docs.cloudbees.com/docs/cloudbees-unify/latest/container-scanners/trivy-plugin
+* SonarQube Plugin: https://docs.cloudbees.com/docs/cloudbees-unify/latest/sast-scanners/sonarqube-plugin
+
+**Component and Workflow Setup**:
+
+* Managing Components: https://docs.cloudbees.com/docs/cloudbees-unify/latest/organizations-components/manage-components
+* SCM Integration: https://docs.cloudbees.com/docs/cloudbees-unify/latest/integrations/scm-integration
+* Workflow DSL Syntax: https://docs.cloudbees.com/docs/cloudbees-unify/latest/dsl-syntax/
+
+'''
+
+[[troubleshooting]]
+== Troubleshooting
+
+This section provides solutions to common issues encountered when implementing CloudBees Unify workflows and analytics.
+
+=== Component Creation Issues
+
+**Issue**: Component creation fails or repository connection doesn't work
+
+*Solution*:
+
+* Verify SCM integration is properly configured in Organization Settings
+* Check that you have necessary permissions in the source repository
+* Ensure repository URL is correct and accessible
+* For private repositories, verify authentication credentials are valid
+
+**Issue**: Workflows don't appear after creating component
+
+*Solution*:
+
+* Confirm workflow files are in `.cloudbees/workflows/` directory (not `.github/workflows/`)
+* Verify YAML syntax is valid using a YAML validator
+* Check that `apiVersion: automation.cloudbees.io/v1alpha1` is present
+* Push changes to the branch configured in component settings
+
+=== Workflow Execution Issues
+
+**Issue**: Workflow fails with "action not found" error
+
+*Solution*:
+
+* Verify action namespace is `cloudbees-io/*` (not `actions/*` or `cloudbees-io-gha/*`)
+* Check action version is correct (e.g., `@v1`, `@v2`)
+* Ensure action name is spelled correctly
+
+**Issue**: Context variables are undefined or empty
+
+*Solution*:
+
+* Use CloudBees context variables: `${{ cloudbees.scm.sha }}` not `${{ github.sha }}`
+* Verify context variable exists in CloudBees DSL documentation
+* Check variable is appropriate for the workflow trigger type
+
+=== Analytics Dashboard Issues
+
+**Issue**: Software Delivery Activity dashboard is empty
+
+*Solution*:
+
+* Verify at least one workflow run has completed successfully
+* Check `register-build-artifact@v2` action is present in workflow
+* Confirm artifact registration step completed without errors
+* Allow 5-10 minutes for data to populate after workflow completion
+
+**Issue**: Test Insights shows no data
+
+*Solution*:
+
+* Verify `publish-test-results@v2` action is in workflow
+* Confirm test framework outputs JUnit XML format
+* Check `results-path` parameter points to correct test result files
+* Ensure `test-type` parameter matches your testing framework
+* Verify test step runs even when tests fail
+
+**Issue**: Security Insights dashboard empty
+
+*Solution*:
+
+* Confirm security scanning action is present in workflow
+* Check security scan step completed successfully
+* Review workflow logs for security action errors
+* Verify component has access to required security tools
+* Allow time for scan results to process and display
+
+**Issue**: DORA Metrics not calculating
+
+*Solution*:
+
+* Verify `register-deployed-artifact@v2` action is used for deployments
+* Check that both build and deployment registrations use matching artifact names and versions
+* Confirm deployments are registered to production environment
+* Ensure sufficient data exists (typically 2-4 weeks for meaningful metrics)
+
+**Issue**: Flow Metrics empty or incomplete
+
+*Solution*:
+
+* Verify Jira integration is configured in CloudBees Unify
+* Check Flow items mapping is configured in Analytics Configuration
+* Confirm commit messages include Jira ticket IDs (e.g., PROJ-123)
+* Verify Jira tickets are in correct status states
+* Allow up to 3 hours for issue polling to synchronize data
+
+=== Common Workflow Errors
+
+**Issue**: "Permission denied" errors during workflow execution
+
+*Solution*:
+
+* Check that component has necessary permissions to access repositories
+* Verify SCM integration credentials are valid and not expired
+* Ensure organization has proper CloudBees Unify subscription/license
+
+**Issue**: Docker commands fail in workflow
+
+*Solution*:
+
+* Use `docker://` prefix for container images: `uses: docker://alpine:latest`
+* Verify container image exists and is accessible
+* Check container image tag is valid
+
+**Issue**: Secrets or variables not available in workflow
+
+*Solution*:
+
+* Verify secrets are configured at organization or component level
+* Use correct syntax for secrets: `${{ secrets.SECRET_NAME }}`
+* Use correct syntax for vars: `${{ vars.VAR_NAME }}`
+* Check secret/variable name matches exactly (case-sensitive)
+
+=== Getting Additional Help
+
+If issues persist after trying these solutions:
+
+* Review CloudBees Unify documentation: https://docs.cloudbees.com/docs/cloudbees-unify/latest/
+* Check workflow run logs in CloudBees Unify for detailed error messages
+* Contact CloudBees Support with:
+  - Component name
+  - Workflow file contents
+  - Run ID of failed execution
+  - Error messages from logs
+
+'''
+
+**Journey Complete!** You've successfully created CloudBees Unify workflows and enabled analytics dashboards. Continue running workflows to build rich historical data for trend analysis and process improvement.
