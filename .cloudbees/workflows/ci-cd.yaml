@@ -20,6 +20,7 @@ jobs:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
       - name: Install dependencies and run tests
+        kind: test
         uses: docker://node:18
         shell: sh
         run: |
@@ -71,6 +72,7 @@ jobs:
           fetch-depth: 0
       - name: Generate version and build
         id: version
+        kind: build
         uses: docker://node:18
         shell: sh
         run: |
@@ -139,6 +141,7 @@ jobs:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
       - name: Deploy to Development
+        kind: deploy
         uses: docker://node:18
         shell: sh
         run: |
@@ -150,7 +153,6 @@ jobs:
         uses: cloudbees-io/register-deployed-artifact@v2
         with:
           artifact-id: ${{ needs.build.outputs.artifact_id }}
-          target-environment: development
           labels: automated-deployment
   deploy-staging:
     needs:
@@ -161,6 +163,7 @@ jobs:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
       - name: Deploy to Staging
+        kind: deploy
         uses: docker://node:18
         shell: sh
         run: |
@@ -172,7 +175,6 @@ jobs:
         uses: cloudbees-io/register-deployed-artifact@v2
         with:
           artifact-id: ${{ needs.build.outputs.artifact_id }}
-          target-environment: staging
           labels: automated-deployment
       - name: Run smoke tests
         uses: docker://node:18
@@ -190,6 +192,7 @@ jobs:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
       - name: Deploy to Production
+        kind: deploy
         uses: docker://node:18
         shell: sh
         run: |
@@ -208,7 +211,6 @@ jobs:
         uses: cloudbees-io/register-deployed-artifact@v2
         with:
           artifact-id: ${{ needs.build.outputs.artifact_id }}
-          target-environment: production
           labels: automated-deployment
       - name: Post-deployment validation
         uses: docker://node:18
