@@ -132,7 +132,6 @@ jobs:
             ## Workflow Summary
             - **Commit**: ${{ cloudbees.scm.sha }}
             - **Workflow Run**: ${{ cloudbees.run_id }}
-            - **Triggered by**: ${{ cloudbees.api.user.email }}
 
   deploy-dev:
     needs: [build]
@@ -238,4 +237,3 @@ jobs:
 
             ## Workflow Info
             - **Run ID**: ${{ cloudbees.run_id }}
-            - **Deployed by**: ${{ cloudbees.api.user.email }}
