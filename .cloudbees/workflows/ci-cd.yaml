@@ -135,7 +135,7 @@ jobs:
   deploy-dev:
     needs:
       - build
-    if: cloudbees.scm.branch == 'zach'
+    if: cloudbees.scm.branch == 'develop'
     environment: development
     steps:
       - name: Checkout code
@@ -157,7 +157,7 @@ jobs:
   deploy-staging:
     needs:
       - build
-    if: cloudbees.scm.branch == 'zach'
+    if: cloudbees.scm.branch == 'main'
     environment: staging
     steps:
       - name: Checkout code
@@ -186,7 +186,7 @@ jobs:
     needs:
       - build
       - deploy-staging
-    if: cloudbees.scm.branch == 'zach'
+    if: cloudbees.scm.branch == 'main'
     environment: production
     steps:
       - name: Checkout code
