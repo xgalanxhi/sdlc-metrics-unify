@@ -197,7 +197,7 @@ jobs:
           echo "Artifact: ${{ env.APP_NAME }}-${{ needs.build.outputs.version }}.tar.gz"
           ls -lh
 
-          if [ "${{ cloudbees.inputs.prod_deployment_status }}" = "failure" ]; then
+          if [ "${{ cloudbees.event.inputs.prod_deployment_status }}" = "failure" ]; then
             echo "Production deployment failed!"
             exit 1
           else
