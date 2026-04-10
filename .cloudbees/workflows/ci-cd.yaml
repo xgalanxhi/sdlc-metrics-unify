@@ -97,6 +97,7 @@ jobs:
         uses: cloudbees-io/register-build-artifact@v2
         with:
           name: ${{ cloudbees.scm.repositoryUrl }}
+          url: https://artifacts.example.com/${{ env.APP_NAME }}/${{ steps.version.outputs.version }}
           version: ${{ steps.version.outputs.version }}
           type: Binary
 
