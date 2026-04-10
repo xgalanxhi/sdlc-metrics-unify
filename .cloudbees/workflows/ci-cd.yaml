@@ -115,8 +115,8 @@ jobs:
         uses: docker://node:18
         shell: sh
         run: |
-          echo "Deploying version ${{ needs.build.outputs.version }} to Development environment"
-          echo "Artifact: ${{ env.APP_NAME }}-${{ needs.build.outputs.version }}.tar.gz"
+          echo "Deploying to Development environment"
+          echo "Application: ${{ env.APP_NAME }}"
           ls -lh
           echo "Deployment completed successfully"
       # TODO: Add register-deployed-artifact@v2 action here to track deployment for DORA metrics
@@ -133,8 +133,8 @@ jobs:
         uses: docker://node:18
         shell: sh
         run: |
-          echo "Deploying version ${{ needs.build.outputs.version }} to Staging environment"
-          echo "Artifact: ${{ env.APP_NAME }}-${{ needs.build.outputs.version }}.tar.gz"
+          echo "Deploying to Staging environment"
+          echo "Application: ${{ env.APP_NAME }}"
           ls -lh
           echo "Deployment completed successfully"
       # TODO: Add register-deployed-artifact@v2 action here to track deployment for DORA metrics
@@ -158,8 +158,8 @@ jobs:
         uses: docker://node:18
         shell: sh
         run: |
-          echo "Deploying version ${{ needs.build.outputs.version }} to Production environment"
-          echo "Artifact: ${{ env.APP_NAME }}-${{ needs.build.outputs.version }}.tar.gz"
+          echo "Deploying to Production environment"
+          echo "Application: ${{ env.APP_NAME }}"
           ls -lh
 
           if [ "${{ cloudbees.event.inputs.prod_deployment_status }}" = "failure" ]; then
