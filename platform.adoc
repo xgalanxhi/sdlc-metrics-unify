@@ -162,9 +162,6 @@ sdlc-metrics-unify/
 ├── .cloudbees/
 │   └── workflows/
 │       └── ci-cd.yaml          # CloudBees Unify workflow
-├── .github/
-│   └── workflows/
-│       └── ci-cd.yml           # GitHub Actions workflow (for comparison)
 ├── src/
 │   ├── server.js               # Node.js Express application
 │   └── server.test.js          # Jest test suite
@@ -175,7 +172,6 @@ sdlc-metrics-unify/
 **Key Files**:
 
 * **`.cloudbees/workflows/ci-cd.yaml`**: Complete CI/CD pipeline with all CloudBees actions for analytics
-* **`.github/workflows/ci-cd.yml`**: Parallel GitHub Actions workflow showing equivalent functionality
 * **`src/server.js`**: Simple Express.js API with test coverage
 * **`package.json`**: Includes `test:ci` script that generates JUnit XML test results
 
@@ -210,11 +206,8 @@ sdlc-metrics-unify/
 | *CloudBees Unify Account*
 | Active account with any edition (Free, Team, Enterprise)
 
-| *GitHub Account*
-| To fork the demo repository
-
-| *GitHub Access*
-| Ability to create a fork and connect it to CloudBees Unify
+| *Repository Access*
+| Ability to fork the demo repository and connect it to CloudBees Unify
 
 | *Time Commitment*
 | 30-45 minutes for complete setup
@@ -230,21 +223,20 @@ This guide uses a pre-configured demo repository that includes all necessary wor
 *What's Included*:
 
 * CloudBees workflow in `.cloudbees/workflows/ci-cd.yaml`
-* GitHub workflow in `.github/workflows/ci-cd.yml` (for comparison)
 * Node.js application with tests
 * Complete CI/CD pipeline with artifact tracking, deployments, and evidence
 
 [[getting-started]]
 === Getting Started: Fork the Repository
 
-Before connecting to CloudBees Unify, fork the demo repository to your GitHub account:
+Before connecting to CloudBees Unify, fork the demo repository:
 
 . Navigate to https://github.com/xgalanxhi/sdlc-metrics-unify
 . Click the *Fork* button in the upper right
-. Select your GitHub account or organization as the destination
+. Select your account or organization as the destination
 . Click *Create fork*
 
-After forking, you'll have your own copy at: `https://github.com/<YOUR_GITHUB_USERNAME>/sdlc-metrics-unify`
+After forking, you'll have your own copy at: `https://github.com/<YOUR_USERNAME>/sdlc-metrics-unify`
 
 This forked repository will be connected to CloudBees Unify as a component in the next steps.
 
@@ -275,7 +267,7 @@ Components in CloudBees Unify are the foundation for running workflows and colle
 
 Before creating a component, verify you have forked the demo repository (see <<getting-started>>):
 
-* Your forked repository should be at: `https://github.com/<YOUR_GITHUB_USERNAME>/sdlc-metrics-unify`
+* Your forked repository should be at: `https://github.com/<YOUR_USERNAME>/sdlc-metrics-unify`
 * The repository should contain `.cloudbees/workflows/ci-cd.yaml`
 
 ===== Step 2: Create a Component
@@ -290,9 +282,9 @@ Before creating a component, verify you have forked the demo repository (see <<g
 *Component Configuration*:
 
 . **Name**: Enter `sdlc-metrics-unify` (or your preferred name)
-. **Repository URL**: Enter your forked repository URL: `https://github.com/<YOUR_GITHUB_USERNAME>/sdlc-metrics-unify`
-. **SCM Provider**: Select *GitHub*
-. **Authentication**: Configure GitHub access (see tip below)
+. **Repository URL**: Enter your forked repository URL: `https://github.com/<YOUR_USERNAME>/sdlc-metrics-unify`
+. **SCM Provider**: Select your SCM provider
+. **Authentication**: Configure repository access (see tip below)
 . Click *Create*
 
 [TIP]
@@ -1735,8 +1727,6 @@ The demonstration workflow in this repository supports Flow Metrics by enabling 
 
 **CloudBees Workflow**: https://github.com/xgalanxhi/sdlc-metrics-unify/blob/main/.cloudbees/workflows/ci-cd.yaml
 
-**GitHub Workflow (for comparison)**: https://github.com/xgalanxhi/sdlc-metrics-unify/blob/main/.github/workflows/ci-cd.yml
-
 When working with your forked repository, include Jira ticket IDs in commit messages (e.g., `PROJ-123: add feature`) to populate Flow Metrics.
 
 '''
@@ -1749,7 +1739,7 @@ When working with your forked repository, include Jira ticket IDs in commit mess
 
 *Core Integration*:
 
-1. Forked the demo repository (https://github.com/xgalanxhi/sdlc-metrics-unify) to your GitHub account
+1. Forked the demo repository (https://github.com/xgalanxhi/sdlc-metrics-unify)
 2. Created a component in CloudBees Unify connected to your forked repository
 3. Executed the pre-configured CI/CD workflow
 4. Populated multiple analytics dashboards with workflow data
@@ -1832,20 +1822,12 @@ Now that you've seen how the demo repository populates CloudBees Unify analytics
 * Track deployments to production for DORA Metrics
 * Build evidence and labels as needed
 
-**5. Use Both Workflows as Reference**
-
-The demo repository includes both CloudBees and GitHub Actions workflows:
-
-* **CloudBees Workflow**: `.cloudbees/workflows/ci-cd.yaml` - Use this as your primary reference
-* **GitHub Workflow**: `.github/workflows/ci-cd.yml` - Compare the two approaches to understand platform differences
-
 === Additional Resources
 
 *Demo Repository*:
 
-* **GitHub**: https://github.com/xgalanxhi/sdlc-metrics-unify
+* **Repository**: https://github.com/xgalanxhi/sdlc-metrics-unify
 * **CloudBees Workflow**: https://github.com/xgalanxhi/sdlc-metrics-unify/blob/main/.cloudbees/workflows/ci-cd.yaml
-* **GitHub Workflow**: https://github.com/xgalanxhi/sdlc-metrics-unify/blob/main/.github/workflows/ci-cd.yml
 
 *CloudBees Documentation*:
 
@@ -1895,7 +1877,7 @@ This section provides solutions to common issues encountered when implementing C
 
 *Solution*:
 
-* Confirm workflow files are in `.cloudbees/workflows/` directory (not `.github/workflows/`)
+* Confirm workflow files are in `.cloudbees/workflows/` directory
 * Verify YAML syntax is valid using a YAML validator
 * Check that `apiVersion: automation.cloudbees.io/v1alpha1` is present
 * Push changes to the branch configured in component settings
@@ -1914,7 +1896,7 @@ This section provides solutions to common issues encountered when implementing C
 
 *Solution*:
 
-* Use CloudBees context variables: `${{ cloudbees.scm.sha }}` not `${{ github.sha }}`
+* Use CloudBees context variables: `${{ cloudbees.scm.sha }}`, `${{ cloudbees.scm.branch }}`, etc.
 * Verify context variable exists in CloudBees DSL documentation
 * Check variable is appropriate for the workflow trigger type
 
