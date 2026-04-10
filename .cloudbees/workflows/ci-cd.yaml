@@ -1,49 +1,42 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
-
 name: CI/CD Pipeline
-
 on:
   workflow_dispatch:
-    prod_deployment_status:
-      description: 'Production deployment outcome'
-      required: true
-      default: 'success'
-      type: choice
-      options:
-        - success
-        - failure
-
+    inputs:
+      prod_deployment_status:
+        type: choice
+        options:
+          - success
+          - failure
+        default: success
+        description: Production deployment outcome
 env:
   NODE_VERSION: "18"
-  APP_NAME: "sdlc-metrics-demo"
-
+  APP_NAME: sdlc-metrics-demo
 jobs:
   test:
     steps:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
-
       - name: Install dependencies and run tests
         uses: docker://node:18
         shell: sh
         run: |
           npm ci
           npm run test:ci
-
       - name: Publish Test Results
         uses: cloudbees-io/publish-test-results@v2
         if: always()
         with:
           test-type: JUNIT
           results-path: junit.xml
-
   lint:
-    needs: [test]
+    needs:
+      - test
     steps:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
-
       - name: Install dependencies and run lint
         uses: docker://node:18
         shell: sh
@@ -51,22 +44,23 @@ jobs:
           npm ci
           npm run lint
         continue-on-error: true
-
   security-scan:
-    needs: [test]
+    needs:
+      - test
     steps:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
-
       - name: Security scan placeholder
         uses: docker://node:18
         shell: sh
         run: |
           echo "Security scan would run here"
           echo "Configure security scanning tools as needed"
-
   build:
-    needs: [test, lint, security-scan]
+    needs:
+      - test
+      - lint
+      - security-scan
     outputs:
       version: ${{ steps.version.outputs.version }}
       artifact_id: ${{ steps.register-artifact.outputs.artifact-id }}
@@ -75,7 +69,6 @@ jobs:
         uses: cloudbees-io/checkout@v2
         with:
           fetch-depth: 0
-
       - name: Generate version and build
         id: version
         uses: docker://node:18
@@ -99,7 +92,6 @@ jobs:
           tar -czf ../${{ env.APP_NAME }}-${VERSION}.tar.gz .
           cd ..
           ls -lh ${{ env.APP_NAME }}-${VERSION}.tar.gz
-
       - name: Register Build Artifact in CloudBees Unify
         id: register-artifact
         uses: cloudbees-io/register-build-artifact@v2
@@ -108,13 +100,11 @@ jobs:
           url: https://artifacts.example.com/${{ env.APP_NAME }}/${{ steps.version.outputs.version }}
           version: ${{ steps.version.outputs.version }}
           type: Binary
-
       - name: Add Labels to Artifact
         uses: cloudbees-io/label-artifact-version@v1
         with:
           artifact-id: ${{ steps.register-artifact.outputs.artifact-id }}
-          labels: "${{ cloudbees.scm.branch }},nodejs,express,automated"
-
+          labels: ${{ cloudbees.scm.branch }},nodejs,express,automated
       - name: Publish Build Evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
@@ -140,15 +130,14 @@ jobs:
             ## Workflow Summary
             - **Commit**: ${{ cloudbees.scm.sha }}
             - **Workflow Run**: ${{ cloudbees.run_id }}
-
   deploy-dev:
-    needs: [build]
+    needs:
+      - build
     if: cloudbees.scm.branch == 'develop'
     environment: development
     steps:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
-
       - name: Deploy to Development
         uses: docker://node:18
         shell: sh
@@ -157,22 +146,20 @@ jobs:
           echo "Artifact: ${{ env.APP_NAME }}-${{ needs.build.outputs.version }}.tar.gz"
           ls -lh
           echo "Deployment completed successfully"
-
       - name: Register Deployed Artifact to Development
         uses: cloudbees-io/register-deployed-artifact@v2
         with:
           artifact-id: ${{ needs.build.outputs.artifact_id }}
           target-environment: development
           labels: automated-deployment
-
   deploy-staging:
-    needs: [build]
+    needs:
+      - build
     if: cloudbees.scm.branch == 'main'
     environment: staging
     steps:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
-
       - name: Deploy to Staging
         uses: docker://node:18
         shell: sh
@@ -181,29 +168,27 @@ jobs:
           echo "Artifact: ${{ env.APP_NAME }}-${{ needs.build.outputs.version }}.tar.gz"
           ls -lh
           echo "Deployment completed successfully"
-
       - name: Register Deployed Artifact to Staging
         uses: cloudbees-io/register-deployed-artifact@v2
         with:
           artifact-id: ${{ needs.build.outputs.artifact_id }}
           target-environment: staging
           labels: automated-deployment
-
       - name: Run smoke tests
         uses: docker://node:18
         shell: sh
         run: |
           echo "Running smoke tests on staging environment..."
           echo "All smoke tests passed"
-
   deploy-production:
-    needs: [build, deploy-staging]
+    needs:
+      - build
+      - deploy-staging
     if: cloudbees.scm.branch == 'main'
     environment: production
     steps:
       - name: Checkout code
         uses: cloudbees-io/checkout@v2
-
       - name: Deploy to Production
         uses: docker://node:18
         shell: sh
@@ -218,7 +203,6 @@ jobs:
           else
             echo "Production deployment completed successfully"
           fi
-
       - name: Register Deployed Artifact to Production
         if: always()
         uses: cloudbees-io/register-deployed-artifact@v2
@@ -226,14 +210,12 @@ jobs:
           artifact-id: ${{ needs.build.outputs.artifact_id }}
           target-environment: production
           labels: automated-deployment
-
       - name: Post-deployment validation
         uses: docker://node:18
         shell: sh
         run: |
           echo "Running post-deployment validation..."
           echo "Validation completed successfully"
-
       - name: Publish Deployment Evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
